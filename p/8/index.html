@@ -136,7 +136,7 @@ body.view main{max-width:1280px;margin:0 auto;width:100%}
   <main id="main"><div class="empty">左上にURLを貼ると、動画の情報・タイトル案3つ・サムネ文言案3つと、根拠になる似た競合サムネ10枚を出します。</div></main>
 </div>
 <script>
-// 閲覧専用モード: 共有ページは <script>window.TEIAN_VIEW={id:9}</script> を前に置いた同じ画面。サーバーを使わず data.json と同じフォルダの画像を読む
+// 閲覧専用モード: 共有ページは、先頭で window.TEIAN_VIEW={id:番号} を決めてから読み込む同じ画面。サーバーを使わず data.json と同じフォルダの画像を読む
 const VIEW=window.TEIAN_VIEW||null;
 function 閲覧用に直す(root){
   if(!VIEW||!root||!root.querySelectorAll)return;
