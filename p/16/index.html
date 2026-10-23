@@ -224,7 +224,7 @@ async function show(id){
     h+=`<div class="card"><h2>タイトルのリライト案<small>スキル madoka-title の手順（99字以下・避け語なし・敵役1個まで）。チップは根拠の言い回しを競合の「タイトル」で数えた強さ</small></h2>`;
     if((r.title_weak||[]).length)h+=`<div style="font-size:12.5px;margin-bottom:10px;color:var(--text)">元タイトルの弱点：${(r.title_weak||[]).map(esc).join('／')}</div>`;
     h+=`<div class="props">`+(r.titles||[]).map((t,k)=>`<div class="prop ${k==r.title_best?'best':''}"><div class="lab"><span>案${k+1}　${esc(t.type)}</span><span>${(vt[k]||{}).len||t.title.length}字${k==r.title_best?'　★推奨':''}</span></div>
-      <div class="tt">${esc(t.title)}</div><div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vt[k]||{}).phrases||[]).map(chip).join('')}</div></div>`).join('')+`</div>`;
+      <div class="tt">${esc(t.title)}</div><div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vt[k]||{}).phrases||[]).map(chip).join('')}</div>${(vt[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vt[k].a_up??(vt[k].phrases.filter(q=>q.top>=100).length)}／${vt[k].phrases.length}個</div>`:''}</div>`).join('')+`</div>`;
     h+=(v.title_check||[]).map(c=>`<details><summary>検査（${esc(c.name)}）：${c.ok?'OK':'要確認'}</summary><pre>${esc(c.text)}</pre></details>`).join('');
     h+=`</div>`;
     const vs=v.thumbs||[];
@@ -235,7 +235,7 @@ async function show(id){
       ${(j.samune||{})[k]?`<a href="/job/${j.id}/samune/${esc(j.samune[k])}" target="_blank" rel="noopener" title="大きく見る"><img class="sbimg" src="/job/${j.id}/samune/${esc(j.samune[k])}" alt="サムネ文言案 ${esc(t.label)}"></a>
         <div class="stxt"><pre>${esc((t.lines||[]).join('\n'))}</pre><button class="ghost" onclick="copyTxt(this)">文字をコピー</button></div>`
         :`<div class="thumbbox">${(t.lines||[]).map(l=>`<div>${esc(l)}</div>`).join('')}</div>${j.state=='完了'?'<div class="note">ヨメコ3型の画像を作っています（1枚10秒ほど）…</div>':''}`}
-      <div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vs[k]||{}).phrases||[]).map(chip).join('')}</div>
+      <div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vs[k]||{}).phrases||[]).map(chip).join('')}</div>${(vs[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vs[k].a_up??(vs[k].phrases.filter(q=>q.top>=100).length)}／${vs[k].phrases.length}個</div>`:''}
       ${(t.refs||[]).length?`<div style="font-size:11.5px;color:var(--sub)">根拠のサムネ：${t.refs.map(id=>{const n=(s.pick||[]).findIndex(p=>p.id==id);return n>=0?`#${n+1}`:`<a href="https://www.youtube.com/watch?v=${esc(id)}" target="_blank" rel="noopener">${esc(id)}</a>`}).join('　')}</div>`:''}
       ${((vs[k]||{}).not_in_sim||[]).length?`<div class="note" style="color:var(--none)">似ている80本にも元にも無い言い回し：${vs[k].not_in_sim.map(esc).join('、')}</div>`:''}
       ${t.needs_check?`<div class="note">台本と要照合：${esc(t.needs_check)}</div>`:''}</div>`).join('')+`</div>`;
