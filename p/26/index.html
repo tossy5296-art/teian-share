@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ja">
+<head><meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>サムネ・タイトル提案</title>
+<style>
+:root{
+  --bg:#f6efe2; --panel:#fffaf1; --panel2:#f3eadb; --line:#e3d7c3; --text:#3a2e25; --sub:#7d6e60;
+  --gold:#b5392c; --sel:#f7e1dd; --r1:#2f8a5b; --r2:#3b6fb5; --r3:#94897c; --none:#c0392b; --warn:#c07a1d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;font-size:14px;line-height:1.6}
+a{color:var(--gold)}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 18px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+header h1{font-size:19px;margin:0 8px 0 0;color:var(--gold);white-space:nowrap;font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;font-weight:600}
+.bar{display:flex;gap:8px;flex:1;min-width:260px}
+.bar input{flex:1;min-width:0;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px 12px;font-size:14px}
+button{background:var(--gold);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer;white-space:nowrap}
+button.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+button:disabled{opacity:.5;cursor:default}
+.wrap{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 62px)}
+aside{background:#fdf8ee;border-right:1px solid var(--line);padding:12px;overflow:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
+aside .it{padding:10px 12px;border-radius:6px;cursor:pointer;border-left:3px solid transparent;margin-bottom:6px;background:transparent}
+aside .it.on{background:var(--sel);border-left-color:var(--gold)}
+aside .it:hover{background:var(--panel2)}
+aside .it .t{font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+aside .it .m{font-size:11px;color:var(--sub);margin-top:4px;display:flex;gap:6px;align-items:center}
+aside .it{position:relative}
+aside .it .ar{position:absolute;top:6px;right:6px;display:none;background:var(--panel);border:1px solid var(--line);color:var(--sub);border-radius:6px;padding:1px 8px;font-size:11px;cursor:pointer}
+aside .it:hover .ar{display:block}
+aside .it .ar:hover{color:var(--gold);border-color:var(--gold)}
+aside .arc{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+aside .arc>.h{font-size:12px;color:var(--sub);cursor:pointer;padding:4px 6px;user-select:none}
+aside .arc>.h:hover{color:var(--gold)}
+aside .arc .it{opacity:.7}
+#cm{position:fixed;display:none;z-index:60;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 14px rgba(60,40,20,.18);padding:4px;min-width:150px}
+#cm div{padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer}
+#cm div:hover{background:var(--sel)}
+main{padding:18px 22px 60px;max-width:1280px;width:100%}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(80,50,20,.06);padding:16px;margin-bottom:18px}
+.card h2{font-size:16px;font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;margin:0 0 12px;color:var(--gold);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card h2 small{color:var(--sub);font-weight:400;font-size:12px}
+.st{display:inline-block;font-size:11px;padding:1px 8px;border-radius:99px;background:var(--r3);color:#fff}
+.st.完了{background:var(--r1)} .st.作業中,.st.待ち,.st.Claude待ち{background:var(--warn)} .st.失敗{background:var(--none)}
+.info{display:grid;grid-template-columns:320px 1fr;gap:16px}
+.info img{width:100%;border-radius:8px;display:block;background:#000;aspect-ratio:16/9;object-fit:cover}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}
+.kv div{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.kv b{display:block;font-size:16px}
+.kv span{font-size:11px;color:var(--sub)}
+.steps{font-size:12px;color:var(--sub);white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 12px;max-height:150px;overflow:auto}
+.props{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.prop{background:#fff;border:1px solid var(--line)!important;border-radius:10px;padding:12px;border:1px solid transparent;display:flex;flex-direction:column;gap:8px}
+.prop.best{border:2px solid var(--gold)!important}
+.prop .lab{font-size:12px;color:var(--gold);font-weight:700;display:flex;justify-content:space-between;gap:6px}
+.prop .tt{font-size:15px;font-weight:700}
+.prop .why{font-size:12.5px;color:var(--text)}
+.thumbbox{background:#000;border-radius:8px;padding:10px 12px;font-weight:800;font-size:15px;line-height:1.5;overflow-x:auto}
+.thumbbox div{white-space:nowrap}
+.stxt{display:flex;flex-direction:column;gap:4px;align-items:flex-end;margin-top:6px}
+.stxt pre{align-self:stretch;margin:0;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;line-height:1.6;white-space:pre-wrap;user-select:all}
+.stxt button{padding:3px 10px;font-size:12px;white-space:nowrap}
+.sbimg{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:8px;cursor:zoom-in;background:#000}
+.thumbbox div:nth-child(1){color:#ff5fd2}.thumbbox div:nth-child(2){color:#fff}.thumbbox div:nth-child(3){color:#fff}
+.thumbbox div:nth-child(4){color:#7fe3ff}.thumbbox div:last-child{color:#ff4b3e;text-shadow:0 0 1px #ffe36b}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11.5px;border-radius:6px;padding:2px 7px;background:var(--r3);color:#fff;cursor:pointer}
+.chip.r1{background:var(--r1)}.chip.r2{background:var(--r2)}.chip.r3{background:var(--r3)}.chip.rなし{background:var(--none)}
+.chip.gS{background:#1f6b45}.chip.gA{background:var(--r1)}.chip.gB{background:#5a9e6f}.chip.gC{background:var(--r2)}.chip.gD{background:var(--r3)}.chip.gなし{background:#b9aea2}
+.gbar{display:inline-block;height:8px;border-radius:4px;background:var(--r1);vertical-align:middle;margin-right:6px}
+.note{font-size:12px;color:var(--warn)}
+.legend{font-size:12px;color:var(--sub);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.grid10{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.sim{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.sim img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000}
+.sim .b{padding:8px 10px;font-size:12px}
+.sim .v{font-weight:700;font-size:14px;color:var(--gold)}
+.sim .o{color:var(--text);margin-top:4px}
+.gtabs{display:flex;gap:6px;margin:10px 0}
+.gtabs button{background:#fff;color:var(--text);border:1px solid var(--line);padding:4px 12px;border-radius:8px;font-size:12.5px}
+.gtabs button.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+.qt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;margin-top:6px}
+.qt b{font-weight:400;color:var(--sub);font-size:11px;margin-left:6px}
+.tg{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:11px;color:var(--text)}
+.tg.ti{border-style:dashed;color:var(--sub)}
+.gridn{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px}
+.gc{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:11.5px}
+.gc.top{outline:3px solid var(--none);outline-offset:-1px}
+.gc img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000;cursor:zoom-in}
+.gc .b{padding:5px 7px}
+.gc .v{display:flex;justify-content:space-between;font-weight:700;color:var(--gold);font-size:13px}
+.gc .v span{color:var(--sub);font-weight:400;font-size:11px}
+.gc .t{color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:2px 0}
+.gc .tgs{display:flex;flex-wrap:wrap;gap:3px;margin:3px 0}
+.gc .d{color:var(--sub);font-size:10.5px;display:flex;justify-content:space-between}
+#lb{position:fixed;inset:0;background:rgba(30,20,10,.82);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#lb.on{display:flex}
+#lb .in{background:var(--panel);border-radius:12px;max-width:min(960px,100%);max-height:100%;overflow:auto;padding:12px}
+#lb img{width:100%;display:block;border-radius:6px}
+#lb .o{margin-top:8px;font-size:13px}
+mark{background:#fbe3a0;color:#3a2e25;border-radius:3px;padding:0 1px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:400;font-size:12px}
+details{margin-top:8px}
+summary{cursor:pointer;color:var(--sub);font-size:12px}
+pre{white-space:pre-wrap;font-size:11.5px;background:var(--panel2);border-radius:8px;padding:8px;color:var(--text);max-height:260px;overflow:auto}
+.empty{color:var(--sub);padding:40px;text-align:center}
+.ja{margin-top:10px;background:var(--sel);border-left:3px solid var(--gold);border-radius:6px;padding:8px 12px;font-size:13px;display:flex;flex-direction:column;gap:4px}
+.ja span{display:inline-block;min-width:110px;color:var(--gold);font-size:11.5px;font-weight:700;margin-right:6px}
+.wl .row{display:grid;grid-template-columns:220px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.wl .ex{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.wl .ex div{font-size:11px;color:var(--sub)}
+.wl .ex img{width:100%;border-radius:6px;display:block}
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr} aside{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}
+  .info{grid-template-columns:1fr} .props{grid-template-columns:1fr} .wl .row{grid-template-columns:1fr}
+}
+.chg{font-size:12px;color:var(--gold);margin-top:4px}
+/* 閲覧専用（GitHub Pages で共有するページ。2026-10-19） */
+body.view .wrap{grid-template-columns:1fr} body.view aside,body.view header .bar,body.view #redo,body.view .steps{display:none}
+body.view main{max-width:1280px;margin:0 auto;width:100%}
+</style>
+</head>
+<body><script>window.TEIAN_VIEW={id:26,img:"../../img/"}</script>
+<header>
+  <h1>サムネ・タイトル提案</h1>
+  <form class="bar" id="f"><input id="url" placeholder="参考にしたい YouTube 動画のURLを貼る" autocomplete="off"><button id="go">提案を作る</button></form>
+  <form class="bar" id="wf" style="max-width:520px"><input id="wq" placeholder="言い回しを調べる（例：どちら様ですか、ガタガタ震え出し　◯＝数字）"><button class="ghost">調べる</button></form>
+</header>
+<div class="wrap">
+  <div id="cm"></div>
+  <aside id="list"><div class="empty">まだありません</div></aside>
+  <div id="lb"><div class="in"></div></div>
+  <main id="main"><div class="empty">左上にURLを貼ると、動画の情報・タイトル案3つ・サムネ文言案3つと、根拠になる似た競合サムネ10枚を出します。</div></main>
+</div>
+<script>
+// 閲覧専用モード: 共有ページは、先頭で window.TEIAN_VIEW={id:番号} を決めてから読み込む同じ画面。サーバーを使わず data.json と同じフォルダの画像を読む
+const VIEW=window.TEIAN_VIEW||null;
+function 閲覧用に直す(root){
+  if(!VIEW||!root||!root.querySelectorAll)return;
+  root.querySelectorAll('[src],[href]').forEach(e=>{for(const a of ['src','href']){const v=e.getAttribute(a);if(!v)continue;
+    if(v.startsWith('/img/'))e.setAttribute(a,(VIEW.img||'img/')+v.slice(5));else{const m=v.match(/^\/job\/\d+\/(.*)$/);if(m)e.setAttribute(a,m[1])}}});
+  root.querySelectorAll('button').forEach(b=>{if(!b.closest('.gtabs')&&!b.closest('.stxt')&&!b.closest('.ja-copy'))b.remove()});
+  root.querySelectorAll('.ja').forEach(d=>{if(d.innerText.includes('共有URL'))d.remove()});
+}
+if(VIEW){document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('view'));
+  new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>閲覧用に直す(n.parentNode||n)))).observe(document.documentElement,{childList:true,subtree:true});}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=n=>n==null?'—':Number(n).toLocaleString('ja-JP');
+const rc=r=>({'1位':'r1','2位':'r2','3位':'r3','なし':'rなし'})[r]||'r3';
+// 強さ（2026-10-19）＝その言い回しを使った10万回以上の動画の本数。kyougou.py の TSUYOSA と同じ区切り
+const grade=top=>top>=200?'S':top>=100?'A':top>=50?'B':top>=20?'C':top>=1?'D':'なし';
+const RANK_NOTE='強さ＝その言い回しを使った10万回以上の動画の本数（再生の多い動画でたくさん使われているほど強い）。S＝200本以上／A＝100〜199本／B＝50〜99本／C＝20〜49本／D＝1〜19本／なし＝10万回以上の動画では使われていない。サムネ文言は、似ている80本か元にある言い回しだけで組む（似80中◯本）';
+let cur=null, timer=null, used=[], gsort='sim', gcur=null;
+const GSORTS=[['sim','似ている順'],['views','再生数順'],['x','倍率順'],['date','新しい順']];
+function gridHtml(s){
+  gcur=s; const top=(s.grid[0]||{}).id;
+  const g=s.grid.slice(); if(gsort!='sim')g.sort((a,b)=>gsort=='date'?String(b.date).localeCompare(String(a.date)):(b[gsort]||0)-(a[gsort]||0));
+  return g.map(p=>`<div class="gc ${p.id==top?'top':''}"><img loading="lazy" src="/img/${esc(p.id)}.jpg" alt="" data-lb="${esc(p.id)}"><div class="b"><div class="v">${num(p.views)}回<span>×${p.x??'—'}</span></div><div class="t" title="${esc(p.title)}">${esc(p.title)}</div><div class="tgs">${(p.tags||[]).map(t=>`<span class="tg">${esc(t)}</span>`).join('')}${(p.ttags||[]).map(t=>`<span class="tg ti">${esc(t)}</span>`).join('')}</div><div class="d"><span>${esc(p.ch)}</span><span>${esc(String(p.date).slice(0,10))}</span></div></div></div>`).join('');
+}
+
+async function api(p,opt){
+  if(VIEW){if(p=='/api/jobs')return {jobs:[],ready:true}; if(p.startsWith('/api/job/')){const r=await fetch('data.json?'+Date.now());return r.json()} throw new Error('この共有ページは閲覧専用です')}
+  const r=await fetch(p,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j}
+function chip(k){const s80=k.sim80!=null?(k.sim80?`・似80中${k.sim80}本`:(k.in_moto?'・元にあり':'・似80中0本')):'';return `<span class="chip ${k.sim80===0&&!k.in_moto?'rなし':'g'+grade(k.top)}" title="10万回以上の動画で${k.top}本・${k.top_ch}局／全体で${k.n}本・${k.ch}局／中央値${num(k.med)}回" data-w="${esc(k.word)}">${esc(k.word)}　強さ${grade(k.top)}（10万回以上で${k.top}本）${s80}</span>`}
+function hl(s){let t=esc(s);for(const w of used){if(w.length<2)continue;const e=esc(w).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/◯/g,'[0-9０-９一二三四五六七八九十百千万億,]+');try{t=t.replace(new RegExp(e,'g'),m=>`<mark>${m}</mark>`)}catch(_){}}return t}
+
+let showArc=false;
+async function archive(id,on){
+  await fetch('/api/archive',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,on})});
+  $('#cm').style.display='none'; loadList();
+}
+document.addEventListener('contextmenu',e=>{const t=e.target.closest('[data-job]');if(!t)return;e.preventDefault();
+  const on=t.dataset.arc!='1', m=$('#cm');
+  m.innerHTML=`<div onclick="archive(${t.dataset.job},${on})">${on?'アーカイブ（一覧から隠す）':'一覧に戻す'}</div><div onclick="location.hash=${t.dataset.job};$('#cm').style.display='none'">開く</div>`;
+  m.style.left=Math.min(e.clientX,innerWidth-170)+'px';m.style.top=Math.min(e.clientY,innerHeight-90)+'px';m.style.display='block'});
+document.addEventListener('click',e=>{if(!e.target.closest('#cm'))$('#cm').style.display='none'});
+async function loadList(){
+  const d=await api('/api/jobs');
+  $('#go').disabled=!d.ready; $('#go').textContent=d.ready?'提案を作る':'データ読み込み中…';
+  const it=j=>`<div class="it ${j.id==cur?'on':''}" data-job="${j.id}" data-arc="${j.archived?1:0}" onclick="location.hash=${j.id}"><div class="t">${esc(j.title)}</div><div class="m"><span class="st ${esc(j.state)}">${esc(j.state)}</span>#${j.id}　${esc(j.created)}</div><span class="ar" title="${j.archived?'一覧に戻す':'一覧から隠す（あとで戻せます）'}" onclick="event.stopPropagation();archive(${j.id},${!j.archived})">${j.archived?'戻す':'アーカイブ'}</span></div>`;
+  const act=d.jobs.filter(j=>!j.archived), arc=d.jobs.filter(j=>j.archived);
+  $('#list').innerHTML=(act.length?act.map(it).join(''):'<div class="empty">'+(arc.length?'すべてアーカイブ済みです':'まだありません')+'</div>')+
+    (arc.length?`<div class="arc"><div class="h" onclick="showArc=!showArc;loadList()">${showArc?'▾':'▸'} アーカイブ済み（${arc.length}）</div>${showArc?arc.map(it).join(''):''}</div>`:'');
+  if(!d.ready)setTimeout(loadList,3000);
+}
+
+async function show(id){
+  cur=id; clearTimeout(timer);
+  const j=await api('/api/job/'+id); loadList();
+  const i=j.info||{}, s=j.sim||{}, r=j.result||{}, v=j.verify||{};
+  used=[...(r.thumbs||[]).flatMap(t=>t.phrases||[]),...(r.titles||[]).flatMap(t=>t.phrases||[])];
+  let h='';
+  h+=`<div class="card"><h2>#${j.id}　<span class="st ${esc(j.state)}">${esc(j.state)}</span><small>${esc(j.url)}</small><span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">${j.state=='完了'?`<button style="padding:4px 10px" onclick="share(${j.id},'pdf')">PDFにする</button><button style="padding:4px 10px" onclick="share(${j.id},'url')">共有URLを作る</button>`:''}${['失敗','Claude待ち','完了'].includes(j.state)&&j.info?`<button class="ghost" style="padding:4px 10px" onclick="retry(${j.id})">もう一度作る</button>`:''}</span></h2>
+  ${(j.web||{}).url?`<div class="ja" style="margin-bottom:10px"><div><span>共有URL（ページ）</span><a href="${esc(j.web.url)}" target="_blank" rel="noopener">${esc(j.web.url)}</a>　<button class="ghost" style="padding:2px 8px" onclick="copyUrl('${esc(j.web.url)}',this)">コピー</button></div><div style="font-size:12px;color:var(--sub)">この画面と同じ見た目で、閲覧だけできるページです（URLを知っている人なら誰でも見られます。検索には出ないようにしてあります）。案が変わると同じURLのまま中身が新しくなります（反映まで1〜2分）。${j.web.state=='失敗'?'<b style="color:var(--none)">前回の更新に失敗しました。「共有URLを作る」を押すとやり直します</b>':''}</div></div>`:''}
+  ${(j.share||{}).state=='公開済み'?`<div class="ja" style="margin-bottom:10px"><div><span>共有URL（PDF版）</span><a href="${esc(j.share.url)}" target="_blank" rel="noopener">${esc(j.share.url)}</a>　<button class="ghost" style="padding:2px 8px" onclick="copyUrl('${esc(j.share.url)}',this)">コピー</button></div><div style="font-size:12px;color:var(--sub)">リンクを知っている人は誰でも見られます（ドライブの共有フォルダのPDF）。そのままクライアントに送れます。</div></div>`
+   :(j.share||{}).state=='アップロード中'?`<div class="ja" style="margin-bottom:10px"><div><span>共有URL</span>PDFをドライブに送っています…（ふだんは1〜3分。同期が遅いときは最長30分待ちます）</div></div>`
+   :(j.share||{}).state=='共有設定待ち'?`<div class="ja" style="margin-bottom:10px;color:var(--none)"><div><span>共有URL</span>ドライブの共有フォルダ「⭐️諸々データ／Claude.ai PDF（宮本さんへ）」が、まだリンク公開になっていません。フォルダを右クリック→共有→「リンクを知っている全員」にしてから、もう一度「共有URLを作る」を押してください（最初の1回だけ）。</div></div>`:''}<div class="steps">${esc((j.steps||[]).slice().reverse().join('\n'))}</div></div>`;
+  if(j.info&&j.sim&&!['待ち','作業中'].includes(j.state)){
+    const rq=(j.requests||[]).slice().reverse(), tn={all:'両方',title:'タイトルだけ',thumb:'サムネ文言だけ'};
+    h+=`<div class="card" id="redo"><h2>指示してもう一度作る<small>案がイマイチなときに、直してほしいことを書いて作り直せます。指示していない所は前の案のまま残し、前の案は控えとして保存します。できあがると共有URLも新しくなります</small></h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px"><span style="font-size:12.5px;color:var(--sub)">直す範囲：</span>
+      ${Object.entries(tn).map(([k,l],i)=>`<label style="font-size:13px"><input type="radio" name="rtg" value="${k}" ${i==0?'checked':''}> ${l}</label>`).join('')}</div>
+      <textarea id="rnote" data-job="${j.id}" rows="4" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:#fff" placeholder="例）④の義母のセリフをもっと嫌味にして。サムネ①の最終行は「直後、義母が顔面蒼白」に。タイトルは全部「白米」を残して"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button onclick="redo(${j.id})">この指示で作り直す</button></div>
+      ${rq.length?`<details style="margin-top:6px"><summary>これまでの指示（${rq.length}件）</summary>${rq.map(r=>`<div style="font-size:12.5px;border-top:1px solid var(--line);padding:6px 0"><span style="color:var(--sub)">${esc(r.at)}・${esc(tn[r.target]||'')}</span><br>${esc(r.note).replace(/\n/g,'<br>')}</div>`).join('')}</details>`:''}</div>`;
+  }
+  if(j.info){
+    const dur=i.duration?`${Math.floor(i.duration/3600)?Math.floor(i.duration/3600)+'時間':''}${Math.floor(i.duration%3600/60)}分`:'—';
+    h+=`<div class="card"><h2>動画の情報</h2><div class="info"><img src="/job/${j.id}/thumb.jpg" alt=""><div>
+      <div style="font-size:16px;font-weight:700"><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}</a></div>
+      <div style="color:var(--sub)">${esc(i.channel)}${i.subs?`（登録者 ${num(i.subs)}人）`:''}</div>
+      ${r.ja?`<div class="ja"><div><span>タイトルの日本語訳</span>${esc(r.ja.title)}</div>${r.ja.thumb?`<div><span>サムネの文字</span>${esc(r.ja.thumb)}</div>`:''}${r.ja.thumb_scene?`<div><span>サムネの絵</span>${esc(r.ja.thumb_scene)}</div>`:''}${r.ja.desc?`<div><span>概要欄（冒頭）</span>${esc(r.ja.desc)}</div>`:''}</div>`
+        :(!/[ぁ-んァ-ヶ一-龥]/.test(i.title||'')?`<div class="ja"><div><span>日本語訳</span>タイトル案と一緒に作成中です…</div></div>`:'')}
+      <div class="kv"><div><b>${num(i.views)}</b><span>再生数</span></div><div><b>${esc(i.date||'—')}</b><span>投稿日</span></div><div><b>${dur}</b><span>長さ</span></div><div><b>${num(i.likes)}</b><span>高評価</span></div><div><b>${num(i.comments)}</b><span>コメント</span></div></div>
+      ${s.ref?`<div style="margin-top:10px;font-size:12.5px"><span style="color:var(--sub)">競合データのサムネ文言（OCR）：</span>${esc(s.ref.lines.join(' / '))}</div>`:''}
+    </div></div></div>`;
+  }
+  if(j.result){
+    const vt=v.titles||[];
+    h+=`<div class="card"><h2>タイトルのリライト案<small>スキル madoka-title の手順（99字以下・避け語なし・敵役1個まで）。チップは根拠の言い回しを競合の「タイトル」で数えた強さ</small></h2>`;
+    if((r.title_weak||[]).length)h+=`<div style="font-size:12.5px;margin-bottom:10px;color:var(--text)">元タイトルの弱点：${(r.title_weak||[]).map(esc).join('／')}</div>`;
+    h+=`<div class="props">`+(r.titles||[]).map((t,k)=>`<div class="prop ${k==r.title_best?'best':''}"><div class="lab"><span>案${k+1}　${esc(t.type)}</span><span>${(vt[k]||{}).len||t.title.length}字${k==r.title_best?'　★推奨':''}</span></div>
+      <div class="tt">${esc(t.title)}</div><div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vt[k]||{}).phrases||[]).map(chip).join('')}</div>${(vt[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vt[k].a_up??(vt[k].phrases.filter(q=>q.top>=100).length)}／${vt[k].phrases.length}個</div>`:''}</div>`).join('')+`</div>`;
+    h+=(v.title_check||[]).map(c=>`<details><summary>検査（${esc(c.name)}）：${c.ok?'OK':'要確認'}</summary><pre>${esc(c.text)}</pre></details>`).join('');
+    h+=`</div>`;
+    const vs=v.thumbs||[];
+    h+=`<div class="card"><h2>サムネ文言案<small>スキル madoka-samune-mongon の手順（変えてはいけない所を残し、変えてよい所だけを競合でよく使われている言い回しに入れ替える）</small></h2>`;
+    if(r.moto)h+=`<div style="font-size:12.5px;margin-bottom:6px"><span style="color:var(--sub)">元（${esc(r.moto.source)}）：</span>${esc((r.moto.lines||[]).join(' / '))}</div>`;
+    if((r.keep||[]).length)h+=`<div style="font-size:12.5px;margin-bottom:10px"><span style="color:var(--sub)">変えなかった所：</span>${(r.keep||[]).map(esc).join('／')}</div>`;
+    h+=`<div class="legend">${RANK_NOTE}</div><div class="props">`+(r.thumbs||[]).map((t,k)=>`<div class="prop ${k==r.thumb_best?'best':''}"><div class="lab"><span>${esc(t.label)}</span><span>${(t.lines||[]).map(l=>l.length).join('・')}字${k==r.thumb_best?'　★推奨':''}</span></div>
+      ${(j.samune||{})[k]?`<a href="/job/${j.id}/samune/${esc(j.samune[k])}" target="_blank" rel="noopener" title="大きく見る"><img class="sbimg" src="/job/${j.id}/samune/${esc(j.samune[k])}" alt="サムネ文言案 ${esc(t.label)}"></a>
+        <div class="stxt"><pre>${esc((t.lines||[]).join('\n'))}</pre><button class="ghost" onclick="copyTxt(this)">文字をコピー</button></div>`
+        :`<div class="thumbbox">${(t.lines||[]).map(l=>`<div>${esc(l)}</div>`).join('')}</div>${j.state=='完了'?'<div class="note">ヨメコ3型の画像を作っています（1枚10秒ほど）…</div>':''}`}
+      <div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vs[k]||{}).phrases||[]).map(chip).join('')}</div>${(vs[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vs[k].a_up??(vs[k].phrases.filter(q=>q.top>=100).length)}／${vs[k].phrases.length}個</div>`:''}
+      ${(t.refs||[]).length?`<div style="font-size:11.5px;color:var(--sub)">根拠のサムネ：${t.refs.map(id=>{const n=(s.pick||[]).findIndex(p=>p.id==id);return n>=0?`#${n+1}`:`<a href="https://www.youtube.com/watch?v=${esc(id)}" target="_blank" rel="noopener">${esc(id)}</a>`}).join('　')}</div>`:''}
+      ${((vs[k]||{}).not_in_sim||[]).length?`<div class="note" style="color:var(--none)">似ている80本にも元にも無い言い回し：${vs[k].not_in_sim.map(esc).join('、')}</div>`:''}
+      ${t.needs_check?`<div class="note">台本と要照合：${esc(t.needs_check)}</div>`:''}</div>`).join('')+`</div>`;
+    if(v.katachi)h+=`<details${v.katachi.ok?'':' open'}><summary>検査（5行・1行15字以下）：${v.katachi.ok?'OK':'要確認'}</summary><pre>${esc(v.katachi.text)}</pre></details>`;
+    if(v.thumb_check)h+=`<details><summary>検査（字数・行数）：${v.thumb_check.ok?'OK':'要確認'}</summary><pre>${esc(v.thumb_check.text)}</pre></details>`;
+    h+=`</div>`;
+  }
+  if(s.pick){
+    h+=`<div class="card"><h2>似ている競合サムネ10枚<small>${s.by?`日本語訳「${esc(s.by)}」で探した、似ている`:'タイトルと元サムネの文言が似ている'}上位${s.pick_from||80}本のうち、再生の多い10本。案の根拠に使ったもの。黄色＝案で使った言い回し</small></h2><div class="grid10">`+
+      s.pick.map((p,k)=>`<a class="sim" href="https://www.youtube.com/watch?v=${esc(p.id)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><img loading="lazy" src="/img/${esc(p.id)}.jpg" alt=""><div class="b"><div><span class="v">#${k+1}　${num(p.views)}回</span></div><div style="color:var(--sub)">${esc(p.ch)}・${esc(p.date)}</div><div class="o">${hl(p.lines.join(' / '))}</div></div></a>`).join('')+`</div></div>`;
+  }
+  if((s.grid||[]).length){
+    h+=`<div class="card" id="gcard"><h2>似たネタの競合サムネ ${s.grid.length}本<small>手元の競合サムネ（長尺 約9.3万本）の文言と題名から、下の札（話のネタ）が重なり、文言も近い順に${s.grid.length}本。${s.nk?`札が${s.nk}つ以上（半分以上）重なるのは全体で${num(s.nh)}本。`:''}×＝その局の中央値の何倍・赤枠＝いちばん近い・点線の札＝題名にだけある・画像を押すと大きく出る</small></h2>
+      <div class="qt"><span style="color:var(--sub)">この動画の札：</span>${(s.qtags||[]).map((q,k,a)=>`${k==0||a[k-1].k!=q.k?`<b>${esc(q.k)}</b>`:''}<span class="tg">${esc(q.t)}</span>`).join('')||'（札が付く言い回しが無いので、文言の近さだけで並べています）'}</div>
+      <div class="gtabs">${GSORTS.map(([k,l])=>`<button data-gs="${k}" class="${k==gsort?'on':''}">${l}</button>`).join('')}</div><div class="gridn" id="gridn">${gridHtml(s)}</div></div>`;
+  }
+  if((s.words||[]).length){
+    const ws=s.words.slice().sort((a,b)=>b.top-a.top), mx=Math.max(1,...ws.map(w=>w.top));
+    h+=`<div class="card"><h2>似た動画のサムネでよく使われている語<small>似ている上位50本のサムネに3枚以上出た語を、強い順に並べた。${RANK_NOTE.split('。')[0]}。語を押すと下で実例を出す</small></h2>
+      <table><tr><th>語</th><th>強さ</th><th>10万回以上の動画で使われた本数</th><th>似ている50本の中</th></tr>`+
+      ws.map(w=>`<tr><td><span class="chip g${grade(w.top)}" data-w="${esc(w.w)}">${esc(w.w)}</span></td><td style="font-weight:700">${grade(w.top)}</td><td><span class="gbar" style="width:${Math.round(120*w.top/mx)}px"></span>${num(w.top)}本・${w.top_ch}局</td><td>${w.df}枚</td></tr>`).join('')+`</table>
+      <div class="legend" style="margin-top:6px">${RANK_NOTE.split('。')[1]||''}</div></div>`;
+  }
+  h+=`<div class="card wl" id="wres" style="display:none"></div>`;
+  const kn=$('#rnote')&&$('#rnote').dataset.job==String(id)?$('#rnote').value:'', kt=(document.querySelector('input[name=rtg]:checked')||{}).value;
+  $('#main').innerHTML=h;
+  if(kn&&$('#rnote')){$('#rnote').value=kn; const r=document.querySelector(`input[name=rtg][value="${kt}"]`); if(r)r.checked=true}
+  if(['待ち','作業中','Claude待ち'].includes(j.state)||['URL待ち','アップロード中'].includes((j.share||{}).state)||(j.state=='完了'&&j.samune_ready===false))timer=setTimeout(()=>show(id),4000);
+}
+
+async function share(id,kind){try{const d=await api('/api/share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,kind})});if(kind=='pdf')location.href=d.pdf;show(id)}catch(e){alert(e.message)}}
+function copyTxt(b){const t=b.parentNode.querySelector('pre').innerText;navigator.clipboard.writeText(t).then(()=>{b.textContent='コピーしました';setTimeout(()=>b.textContent='文字をコピー',1500)}).catch(()=>{prompt('この文字をコピーしてください',t)})}
+function copyUrl(u,b){navigator.clipboard.writeText(u).then(()=>{b.textContent='コピーしました'}).catch(()=>{prompt('このURLをコピーしてください',u)})}
+async function redo(id){
+  const note=($('#rnote').value||'').trim(); if(!note){alert('直してほしいことを書いてください');return}
+  const target=(document.querySelector('input[name=rtg]:checked')||{}).value||'all';
+  if(!confirm('この指示で作り直します。よろしいですか？\n（前の案は控えとして残ります）'))return;
+  try{await api('/api/redo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,note,target})});show(id);loadList()}catch(e){alert(e.message)}
+}
+async function retry(id){try{await api('/api/retry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});show(id)}catch(e){alert(e.message)}}
+async function word(q){
+  const box=$('#wres')||(()=>{$('#main').insertAdjacentHTML('afterbegin','<div class="card wl" id="wres"></div>');return $('#wres')})();
+  box.style.display='';box.innerHTML='<h2>調べています…</h2>';
+  try{
+    const d=await api('/api/word?w='+encodeURIComponent(q));
+    box.innerHTML=`<h2>言い回しの使われ方<small>${RANK_NOTE}</small></h2>`+d.results.map(k=>`<div class="row"><div><div style="font-size:16px;font-weight:700">${esc(k.word)}</div>
+      <div><span class="chip g${grade(k.top)}">強さ${grade(k.top)}</span></div><div style="font-size:12px;color:var(--sub);margin-top:6px">10万回以上の動画で ${k.top}本・${k.top_ch}局<br>全体で ${num(k.n)}本・${k.ch}局<br>中央値 ${num(k.med)}回</div></div>
+      <div class="ex">${k.ex.map(e=>`<a href="https://www.youtube.com/watch?v=${esc(e.id)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><img loading="lazy" src="/img/${esc(e.id)}.jpg" alt=""><div>${num(e.views)}回・${esc(e.ch)}</div></a>`).join('')||'<div>競合サムネに1本もありません</div>'}</div></div>`).join('');
+    box.scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){box.innerHTML=`<h2>調べられませんでした：${esc(e.message)}</h2>`}
+}
+
+$('#f').onsubmit=async e=>{e.preventDefault();const u=$('#url').value.trim();if(!u)return;
+  try{const d=await api('/api/teian',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});$('#url').value='';location.hash=d.id}catch(err){alert(err.message)}};
+$('#wf').onsubmit=e=>{e.preventDefault();const q=$('#wq').value.trim();if(q)word(q)};
+document.addEventListener('click',e=>{if(VIEW)return;const c=e.target.closest('.chip[data-w]');if(c){e.preventDefault();word(c.dataset.w)}});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-gs]');if(t&&gcur){gsort=t.dataset.gs;document.querySelectorAll('[data-gs]').forEach(b=>b.classList.toggle('on',b==t));$('#gridn').innerHTML=gridHtml(gcur);return}
+  const im=e.target.closest('[data-lb]');if(im&&gcur){const p=gcur.grid.find(x=>x.id==im.dataset.lb);if(!p)return;
+    $('#lb .in').innerHTML=`<img src="/img/${esc(p.id)}.jpg" alt=""><div class="o"><b style="color:var(--gold)">${num(p.views)}回</b>　×${p.x??'—'}　${esc(p.ch)}・${esc(String(p.date).slice(0,10))}　<a href="https://www.youtube.com/watch?v=${esc(p.id)}" target="_blank" rel="noopener">YouTubeで開く</a></div><div class="o">${esc(p.title)}</div><div class="o" style="color:var(--sub)">文言（読み取り）：${esc((p.lines||[]).join(' / '))}</div>`;
+    $('#lb').classList.add('on');return}
+  if(e.target.id=='lb')$('#lb').classList.remove('on');
+});
+document.addEventListener('keydown',e=>{if(e.key=='Escape')$('#lb').classList.remove('on')});
+window.onhashchange=()=>{if(VIEW)return;const n=parseInt(location.hash.slice(1));if(n)show(n)};
+if(VIEW){document.title='サムネ・タイトル提案 #'+VIEW.id;show(VIEW.id)}else loadList().then(()=>{const n=parseInt(location.hash.slice(1));if(n)show(n)});
+</script>
+</body>
+</html>
