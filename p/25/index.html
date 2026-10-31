@@ -239,6 +239,7 @@ async function show(id){
       ${(t.refs||[]).length?`<div style="font-size:11.5px;color:var(--sub)">根拠のサムネ：${t.refs.map(id=>{const n=(s.pick||[]).findIndex(p=>p.id==id);return n>=0?`#${n+1}`:`<a href="https://www.youtube.com/watch?v=${esc(id)}" target="_blank" rel="noopener">${esc(id)}</a>`}).join('　')}</div>`:''}
       ${((vs[k]||{}).not_in_sim||[]).length?`<div class="note" style="color:var(--none)">似ている80本にも元にも無い言い回し：${vs[k].not_in_sim.map(esc).join('、')}</div>`:''}
       ${t.needs_check?`<div class="note">台本と要照合：${esc(t.needs_check)}</div>`:''}</div>`).join('')+`</div>`;
+    if(v.katachi)h+=`<details${v.katachi.ok?'':' open'}><summary>検査（5行・1行15字以下）：${v.katachi.ok?'OK':'要確認'}</summary><pre>${esc(v.katachi.text)}</pre></details>`;
     if(v.thumb_check)h+=`<details><summary>検査（字数・行数）：${v.thumb_check.ok?'OK':'要確認'}</summary><pre>${esc(v.thumb_check.text)}</pre></details>`;
     h+=`</div>`;
   }
