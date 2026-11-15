@@ -133,6 +133,17 @@ pre{white-space:pre-wrap;font-size:11.5px;background:var(--panel2);border-radius
 .ck.ok{color:var(--r1);border-color:var(--r1)}.ck.no{color:#a89c8e}.ck.ng{color:#fff;background:var(--none);border-color:var(--none)}
 .kt td:first-child{white-space:nowrap}
 body.view #kbtn{display:none}
+/* ずらし方を選ぶ（2026-11-15） */
+.st.選択待ち{background:#3b6fb5}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0}
+.opt{display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer}
+.opt:has(input:checked){border:2px solid var(--gold);background:#fffdf8}
+.opt input{margin-right:6px}
+.opt .lab{font-size:14px;font-weight:700;color:var(--gold);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.opt .lab small{font-weight:400;color:var(--sub);font-size:11.5px}
+.opt .kae{font-size:13px;background:var(--panel2);border-radius:8px;padding:6px 10px}
+.opt .ars{font-size:13px}
+@media (max-width:900px){.opts{grid-template-columns:1fr}}
 /* 閲覧専用（GitHub Pages で共有するページ。2026-10-19） */
 body.view .wrap{grid-template-columns:1fr} body.view aside,body.view header .bar,body.view #redo,body.view .steps{display:none}
 body.view main{max-width:1280px;margin:0 auto;width:100%}
@@ -149,7 +160,7 @@ body.view main{max-width:1280px;margin:0 auto;width:100%}
   <div id="cm"></div>
   <aside id="list"><div class="empty">まだありません</div></aside>
   <div id="lb"><div class="in"></div></div>
-  <main id="main"><div class="empty">左上にURLを貼ると、動画の情報・うちのCHとの相性（本命／有望／開拓／避ける）・タイトル案5つ・サムネ文言案5つと、根拠になる似た競合サムネ10枚を出します。</div></main>
+  <main id="main"><div class="empty">左上にURLを貼ると、動画の情報・うちのCHとの相性（本命／有望／開拓／避ける）と、参考動画からの「ずらし方」の選択肢を出します。ずらし方を選ぶと、その方向でタイトル案5つ・サムネ文言案5つを作ります。</div></main>
 </div>
 <script>
 // 閲覧専用モード: 共有ページは、先頭で window.TEIAN_VIEW={id:番号} を決めてから読み込む同じ画面。サーバーを使わず data.json と同じフォルダの画像を読む
@@ -218,6 +229,36 @@ async function karte(){
   $('#kcard').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+// ずらし方を選ぶ（2026-11-15）: 参考動画とそっくりにしないため、案を作る前に Claude がずらし方の選択肢を出す。選ぶと、その方向で案を作る
+function optHtml(j){
+  const o=j.options, z=j.zurashi||{}, busy=['待ち','作業中'].includes(j.state);
+  if(VIEW){const p=z.option; return p?`<div class="card"><h2>この提案のずらし方<small>参考動画の要素は生かしつつ、内容を変えています</small></h2>
+    <div style="font-weight:700">${esc(p.name)}</div><div class="opt" style="cursor:default;margin-top:8px"><div class="kae">${(p.kaeru||[]).map(x=>`<div>${esc(x)}</div>`).join('')}</div><div class="ars">${esc(p.arasuji)}</div></div></div>`:''}
+  if(busy||!j.info||!j.sim)return '';
+  if(!o||!(o.options||[]).length)return `<div class="card" id="opt"><h2>ずらし方を選ぶ<small>この提案は、ずらし方を選ぶ仕組みが入る前に作ったものです。選択肢を出すと、参考動画の要素は生かしつつ内容を変えた案に作り直せます（前の案は控えに残ります）</small></h2>
+    <button onclick="sentaku(${j.id})">ずらし方の選択肢を出す</button></div>`;
+  const cur=z.pick||o.osusume;
+  return `<div class="card" id="opt"><h2>ずらし方を選ぶ<small>参考動画とそっくりにしないため、生かす要素は残して内容を変えます。どう変えるかを選ぶと、その方向でタイトル案とサムネ文言案を作ります${z.pick?'（選び直すと作り直します。前の案は控えに残ります）':''}</small></h2>
+    ${o.hanashi?`<div style="font-size:13px;margin-bottom:6px"><span style="color:var(--sub)">参考動画の話：</span>${esc(o.hanashi)}</div>`:''}
+    ${(o.youso||[]).length?`<div class="qt" style="margin-bottom:4px"><span style="color:var(--sub)">生かす要素：</span>${o.youso.map(y=>`<span class="tg">${esc(y)}</span>`).join('')}</div>`:''}
+    <div class="opts">${o.options.map(p=>`<label class="opt"><div class="lab"><span><input type="radio" name="zr" value="${esc(p.id)}" ${p.id==cur?'checked':''}>${esc(p.id)}　${esc(p.name)}</span><small>${esc(p.haba||'')}${p.id==o.osusume?'　★おすすめ':''}${p.id==z.pick?'　いまの案はこれ':''}</small></div>
+      <div class="kae">${(p.kaeru||[]).map(x=>`<div>${esc(x)}</div>`).join('')}</div><div class="ars">${esc(p.arasuji)}</div>
+      <div class="bs">${p.kata?'うちの型：'+esc(p.kata)+'　':''}${esc(p.why||'')}</div></label>`).join('')}</div>
+    ${o.osusume_why?`<div class="bs" style="margin-bottom:6px">おすすめの理由：${esc(o.osusume_why)}</div>`:''}
+    <textarea id="znote" rows="2" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:#fff" placeholder="追加の指示（任意）　例）義姉ではなく義妹にして。金額は月15万で。AとCを混ぜて">${esc(z.note||'')}</textarea>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><button class="ghost" onclick="sentaku(${j.id})">選択肢を出し直す</button><button onclick="erabu(${j.id})">${z.pick?'この方向で作り直す':'この方向で作る'}</button></div></div>`;
+}
+async function erabu(id){
+  const pick=(document.querySelector('input[name=zr]:checked')||{}).value; if(!pick){alert('ずらし方を1つ選んでください');return}
+  const note=(($('#znote')||{}).value||'').trim();
+  try{await api('/api/erabu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,pick,note})});show(id);loadList()}catch(e){alert(e.message)}
+}
+async function sentaku(id){
+  if(!confirm('ずらし方の選択肢を作ります（2〜5分ほど）。よろしいですか？'))return;
+  try{await api('/api/sentaku',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});show(id);loadList()}catch(e){alert(e.message)}
+}
+const zrLine=z=>!z?'':`<div class="chk">参考との近さ：<span class="ck ${z.ok?'ok':'ng'}">${z.ok?'✓ ずれている':'✕ 近すぎる'}</span><span class="ck no">重なり ${Math.round(z.rate*100)}%</span><span class="ck no">${z.run!=null?'同じ並び '+z.run+'字':'ほぼ同じ行 '+z.same+'行'}</span></div>`;
+
 let showArc=false;
 async function archive(id,on){
   await fetch('/api/archive',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,on})});
@@ -249,7 +290,8 @@ async function show(id){
   ${(j.share||{}).state=='公開済み'?`<div class="ja" style="margin-bottom:10px"><div><span>共有URL（PDF版）</span><a href="${esc(j.share.url)}" target="_blank" rel="noopener">${esc(j.share.url)}</a>　<button class="ghost" style="padding:2px 8px" onclick="copyUrl('${esc(j.share.url)}',this)">コピー</button></div><div style="font-size:12px;color:var(--sub)">リンクを知っている人は誰でも見られます（ドライブの共有フォルダのPDF）。そのままクライアントに送れます。</div></div>`
    :(j.share||{}).state=='アップロード中'?`<div class="ja" style="margin-bottom:10px"><div><span>共有URL</span>PDFをドライブに送っています…（ふだんは1〜3分。同期が遅いときは最長30分待ちます）</div></div>`
    :(j.share||{}).state=='共有設定待ち'?`<div class="ja" style="margin-bottom:10px;color:var(--none)"><div><span>共有URL</span>ドライブの共有フォルダ「⭐️諸々データ／Claude.ai PDF（宮本さんへ）」が、まだリンク公開になっていません。フォルダを右クリック→共有→「リンクを知っている全員」にしてから、もう一度「共有URLを作る」を押してください（最初の1回だけ）。</div></div>`:''}<div class="steps">${esc((j.steps||[]).slice().reverse().join('\n'))}</div></div>`;
-  if(j.info&&j.sim&&!['待ち','作業中'].includes(j.state)){
+  h+=optHtml(j);
+  if(j.info&&j.sim&&j.result&&!['待ち','作業中'].includes(j.state)){
     const rq=(j.requests||[]).slice().reverse(), tn={all:'両方',title:'タイトルだけ',thumb:'サムネ文言だけ'};
     h+=`<div class="card" id="redo"><h2>指示してもう一度作る<small>案がイマイチなときに、直してほしいことを書いて作り直せます。指示していない所は前の案のまま残し、前の案は控えとして保存します。できあがると共有URLも新しくなります</small></h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px"><span style="font-size:12.5px;color:var(--sub)">直す範囲：</span>
@@ -275,21 +317,22 @@ async function show(id){
     h+=`<div class="card"><h2>タイトルのリライト案<small>スキル madoka-title の手順（99字以下・避け語なし・敵役1個まで）。チップは根拠の言い回しを競合の「タイトル」で数えた強さ</small></h2>`;
     if((r.title_weak||[]).length)h+=`<div style="font-size:12.5px;margin-bottom:10px;color:var(--text)">元タイトルの弱点：${(r.title_weak||[]).map(esc).join('／')}</div>`;
     h+=`<div class="props">`+(r.titles||[]).map((t,k)=>`<div class="prop ${k==r.title_best?'best':''}"><div class="lab"><span>案${k+1}　${esc(t.type)}</span><span>${(vt[k]||{}).len||t.title.length}字${k==r.title_best?'　★推奨':''}</span></div>
-      <div class="tt">${esc(t.title)}</div><div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vt[k]||{}).phrases||[]).map(chip).join('')}</div>${(vt[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vt[k].a_up??(vt[k].phrases.filter(q=>q.top>=100).length)}／${vt[k].phrases.length}個</div>`:''}${chLine((vt[k]||{}).ch)}</div>`).join('')+`</div>`;
+      <div class="tt">${esc(t.title)}</div><div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vt[k]||{}).phrases||[]).map(chip).join('')}</div>${(vt[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vt[k].a_up??(vt[k].phrases.filter(q=>q.top>=100).length)}／${vt[k].phrases.length}個</div>`:''}${chLine((vt[k]||{}).ch)}${zrLine(((v.zurashi||{}).titles||[])[k])}</div>`).join('')+`</div>`;
     h+=(v.title_check||[]).map(c=>`<details><summary>検査（${esc(c.name)}）：${c.ok?'OK':'要確認'}</summary><pre>${esc(c.text)}</pre></details>`).join('');
     h+=`</div>`;
     const vs=v.thumbs||[];
-    h+=`<div class="card"><h2>サムネ文言案<small>スキル madoka-samune-mongon の手順（変えてはいけない所を残し、変えてよい所だけを競合でよく使われている言い回しに入れ替える）</small></h2>`;
+    h+=`<div class="card"><h2>サムネ文言案<small>スキル madoka-samune-mongon の手順（行の役割・型・強い言い回しは残し、内容は選んだずらし方に合わせて変える。言い回しは競合でよく使われているものを使う）</small></h2>`;
     if(r.moto)h+=`<div style="font-size:12.5px;margin-bottom:6px"><span style="color:var(--sub)">元（${esc(r.moto.source)}）：</span>${esc((r.moto.lines||[]).join(' / '))}</div>`;
     if((r.keep||[]).length)h+=`<div style="font-size:12.5px;margin-bottom:10px"><span style="color:var(--sub)">変えなかった所：</span>${(r.keep||[]).map(esc).join('／')}</div>`;
     h+=`<div class="legend">${RANK_NOTE}</div><div class="props">`+(r.thumbs||[]).map((t,k)=>`<div class="prop ${k==r.thumb_best?'best':''}"><div class="lab"><span>${esc(t.label)}</span><span>${(t.lines||[]).map(l=>l.length).join('・')}字${k==r.thumb_best?'　★推奨':''}</span></div>
       ${(j.samune||{})[k]?`<a href="/job/${j.id}/samune/${esc(j.samune[k])}" target="_blank" rel="noopener" title="大きく見る"><img class="sbimg" src="/job/${j.id}/samune/${esc(j.samune[k])}" alt="サムネ文言案 ${esc(t.label)}"></a>
         <div class="stxt"><pre>${esc((t.lines||[]).join('\n'))}</pre><button class="ghost" onclick="copyTxt(this)">文字をコピー</button></div>`
         :`<div class="thumbbox">${(t.lines||[]).map(l=>`<div>${esc(l)}</div>`).join('')}</div>${j.state=='完了'?'<div class="note">ヨメコ3型の画像を作っています（1枚10秒ほど）…</div>':''}`}
-      <div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vs[k]||{}).phrases||[]).map(chip).join('')}</div>${(vs[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vs[k].a_up??(vs[k].phrases.filter(q=>q.top>=100).length)}／${vs[k].phrases.length}個</div>`:''}${chLine((vs[k]||{}).ch)}
+      <div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vs[k]||{}).phrases||[]).map(chip).join('')}</div>${(vs[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vs[k].a_up??(vs[k].phrases.filter(q=>q.top>=100).length)}／${vs[k].phrases.length}個</div>`:''}${chLine((vs[k]||{}).ch)}${zrLine(((v.zurashi||{}).thumbs||[])[k])}
       ${(t.refs||[]).length?`<div style="font-size:11.5px;color:var(--sub)">根拠のサムネ：${t.refs.map(id=>{const n=(s.pick||[]).findIndex(p=>p.id==id);return n>=0?`#${n+1}`:`<a href="https://www.youtube.com/watch?v=${esc(id)}" target="_blank" rel="noopener">${esc(id)}</a>`}).join('　')}</div>`:''}
       ${((vs[k]||{}).not_in_sim||[]).length?`<div class="note" style="color:var(--none)">似ている80本にも元にも無い言い回し：${vs[k].not_in_sim.map(esc).join('、')}</div>`:''}
       ${t.needs_check?`<div class="note">台本と要照合：${esc(t.needs_check)}</div>`:''}</div>`).join('')+`</div>`;
+    if(v.zurashi&&!v.zurashi.old)h+=`<details${v.zurashi.ok?'':' open'}><summary>検査（参考動画と同じにしない）：${v.zurashi.ok?'OK':'要確認'}</summary><pre>${esc(v.zurashi.text)}</pre></details>`;
     if(v.katachi)h+=`<details${v.katachi.ok?'':' open'}><summary>検査（5行・1行15字以下）：${v.katachi.ok?'OK':'要確認'}</summary><pre>${esc(v.katachi.text)}</pre></details>`;
     if(v.thumb_check)h+=`<details><summary>検査（字数・行数）：${v.thumb_check.ok?'OK':'要確認'}</summary><pre>${esc(v.thumb_check.text)}</pre></details>`;
     h+=`</div>`;
