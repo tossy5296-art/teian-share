@@ -118,6 +118,21 @@ pre{white-space:pre-wrap;font-size:11.5px;background:var(--panel2);border-radius
   .info{grid-template-columns:1fr} .props{grid-template-columns:1fr} .wl .row{grid-template-columns:1fr}
 }
 .chg{font-size:12px;color:var(--gold);margin-top:4px}
+/* うちのCHとの相性（2026-11-15） */
+.stg{display:inline-block;border-radius:6px;padding:2px 12px;font-weight:700;font-size:15px;color:#fff;background:var(--r3);white-space:nowrap}
+.stg.sm{font-size:11.5px;padding:0 7px}
+.stg.s本命{background:#c0392b}.stg.s有望{background:#c9a227}.stg.s開拓{background:#3b6fb5}.stg.s避ける{background:#5b5048}.stg.s型の外,.stg.s未判定{background:#94897c}
+.fit{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:15px;margin-bottom:10px}
+.ft{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:13px}
+.ft .hit{color:var(--sub);font-size:12px;margin-left:8px}
+.bs{color:var(--sub);font-size:11.5px}
+.fw{font-size:13px;border-left:3px solid var(--warn);background:#fbf1de;border-radius:6px;padding:5px 10px;margin-bottom:6px}
+.fw b{color:var(--warn);margin-right:6px}
+.chk{font-size:11.5px;color:var(--sub);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.ck{border-radius:6px;padding:0 6px;border:1px solid var(--line);background:#fff}
+.ck.ok{color:var(--r1);border-color:var(--r1)}.ck.no{color:#a89c8e}.ck.ng{color:#fff;background:var(--none);border-color:var(--none)}
+.kt td:first-child{white-space:nowrap}
+body.view #kbtn{display:none}
 /* 閲覧専用（GitHub Pages で共有するページ。2026-10-19） */
 body.view .wrap{grid-template-columns:1fr} body.view aside,body.view header .bar,body.view #redo,body.view .steps{display:none}
 body.view main{max-width:1280px;margin:0 auto;width:100%}
@@ -128,12 +143,13 @@ body.view main{max-width:1280px;margin:0 auto;width:100%}
   <h1>サムネ・タイトル提案</h1>
   <form class="bar" id="f"><input id="url" placeholder="参考にしたい YouTube 動画のURLを貼る" autocomplete="off"><button id="go">提案を作る</button></form>
   <form class="bar" id="wf" style="max-width:520px"><input id="wq" placeholder="言い回しを調べる（例：どちら様ですか、ガタガタ震え出し　◯＝数字）"><button class="ghost">調べる</button></form>
+  <button class="ghost" id="kbtn" type="button" onclick="karte()" title="まどかチャンネルの分析から読み取った、勝ち筋の型・避けるもの・まだ無い切り口">うちのCHの勝ち筋</button>
 </header>
 <div class="wrap">
   <div id="cm"></div>
   <aside id="list"><div class="empty">まだありません</div></aside>
   <div id="lb"><div class="in"></div></div>
-  <main id="main"><div class="empty">左上にURLを貼ると、動画の情報・タイトル案3つ・サムネ文言案3つと、根拠になる似た競合サムネ10枚を出します。</div></main>
+  <main id="main"><div class="empty">左上にURLを貼ると、動画の情報・うちのCHとの相性（本命／有望／開拓／避ける）・タイトル案5つ・サムネ文言案5つと、根拠になる似た競合サムネ10枚を出します。</div></main>
 </div>
 <script>
 // 閲覧専用モード: 共有ページは、先頭で window.TEIAN_VIEW={id:番号} を決めてから読み込む同じ画面。サーバーを使わず data.json と同じフォルダの画像を読む
@@ -167,6 +183,40 @@ async function api(p,opt){
   const r=await fetch(p,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j}
 function chip(k){const s80=k.sim80!=null?(k.sim80?`・似80中${k.sim80}本`:(k.in_moto?'・元にあり':'・似80中0本')):'';return `<span class="chip ${k.sim80===0&&!k.in_moto?'rなし':'g'+grade(k.top)}" title="10万回以上の動画で${k.top}本・${k.top_ch}局／全体で${k.n}本・${k.ch}局／中央値${num(k.med)}回" data-w="${esc(k.word)}">${esc(k.word)}　強さ${grade(k.top)}（10万回以上で${k.top}本）${s80}</span>`}
 function hl(s){let t=esc(s);for(const w of used){if(w.length<2)continue;const e=esc(w).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/◯/g,'[0-9０-９一二三四五六七八九十百千万億,]+');try{t=t.replace(new RegExp(e,'g'),m=>`<mark>${m}</mark>`)}catch(_){}}return t}
+
+// うちのCHとの相性（2026-11-15）: まどかチャンネルの分析の勝ち筋に、参考動画の題名とサムネ文言を当てた目安。共有ページには根拠の数字を出さない
+const stg=(x,sm)=>`<span class="stg ${sm?'sm ':''}s${esc(x)}">${esc(x)}</span>`;
+function fitHtml(f,r){
+  if(!f)return '';
+  return `<div class="card"><h2>うちのCHとの相性<small>まどかチャンネルの分析（${esc(f.updated)}）の勝ち筋に、この動画の題名とサムネ文言の言葉を当てて見分けた目安。本命＝いちばん厚い型／有望／開拓／避ける＝伸びていない側に並んだ題材／型の外＝うちで実績のない題材</small></h2>
+    <div class="fit">${stg(f.stage)}<b>${esc(f.head)}</b>${f.jiku?`<span class="bs">うちの軸：${esc(f.jiku)}</span>`:''}</div>
+    ${(f.types||[]).map(t=>`<div class="ft">${stg(t.stage,1)}　<b>${esc(t.name)}</b><span class="hit">当たった言葉：${(t.hit||[]).map(esc).join('・')}</span><div>活かし方：${esc(t.advice)}</div>${t.basis?`<div class="bs">根拠：${esc(t.basis)}</div>`:''}</div>`).join('')}
+    ${(f.warn||[]).map(w=>`<div class="fw"><b>${esc(w.kind)}</b>${esc(w.text)}${w.basis?`<span class="bs">　（${esc(w.basis)}）</span>`:''}</div>`).join('')}
+    ${r.ch_note?`<div class="ja"><div><span>Claudeの見立て</span>${esc(r.ch_note)}</div></div>`:''}
+    ${f.caveat?`<div class="bs" style="margin-top:6px">${esc(f.caveat)}</div>`:''}</div>`;
+}
+const chLine=c=>!c?'':`<div class="chk">うちの型：${(c.ok||[]).map(x=>`<span class="ck ok">✓ ${esc(x)}</span>`).join('')}${(c.miss||[]).map(x=>`<span class="ck no">— ${esc(x)}</span>`).join('')}${(c.ng||[]).map(x=>`<span class="ck ng">✕ ${esc(x)}</span>`).join('')}</div>`;
+async function karte(){
+  const old=$('#kcard'); if(old){old.remove();return}
+  let k; try{k=await api('/api/karte')}catch(e){alert('勝ち筋のカルテが読めませんでした：'+e.message);return}
+  const tb=(hd,rows)=>`<table class="kt"><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table>`;
+  const h3=t=>`<div style="font-weight:700;margin:14px 0 4px;color:var(--gold)">${t}</div>`;
+  $('#main').insertAdjacentHTML('afterbegin',`<div class="card" id="kcard"><h2>うちのCHの勝ち筋<small>${(k.sources||[]).map(esc).join('・')} の読み取り（${esc(k.updated)}）。提案の「うちのCHとの相性」と、案を作る指示文に使っています</small><span style="margin-left:auto"><button class="ghost" style="padding:2px 10px" onclick="karte()">閉じる</button></span></h2>
+    <div class="fit"><b>軸：${esc(k.jiku)}</b><span class="bs">${esc(k.jiku_basis)}</span></div>
+    ${h3('勝ち筋の型')}${tb(['段階','型','活かし方','根拠'],(k.types||[]).map(t=>[stg(t.stage,1),esc(t.name),esc(t.advice)+(t.caution?`<div class="note">${esc(t.caution)}${t.caution_basis?'（'+esc(t.caution_basis)+'）':''}</div>`:''),`<span class="bs">${esc(t.basis)}</span>`]))}
+    ${h3('伸びてる動画の組み立て')}<div style="font-size:13px">${esc((k.kumitate||{}).text)}<span class="bs">　（${esc((k.kumitate||{}).basis)}）</span></div>
+    <div style="font-size:13px;margin-top:4px">${(k.kiku||[]).map(x=>`${esc(x.w)}<span class="bs">（${esc(x.basis)}）</span>`).join('　／　')}</div>
+    ${h3('避けるもの')}${tb(['区分','内容','根拠'],[['題材',(k.avoid_topics||[]).map(a=>esc(a.name)).join('、'),`<span class="bs">${esc(k.avoid_topics_basis)}</span>`],
+      ...(k.avoid_words||[]).map(a=>['言葉',`「${esc(a.w)}」→ ${esc(a.alt)}`,`<span class="bs">${esc(a.basis)}</span>`]),
+      ['となり',`「${((k.avoid_neighbors||{}).words||[]).map(esc).join('」「')}」がつく動画のとなりは狙わない`,`<span class="bs">${esc((k.avoid_neighbors||{}).basis)}</span>`],
+      ['主人公','男性が主人公の話は控える',`<span class="bs">${esc((k.male||{}).basis)}</span>`]])}
+    ${h3('次に作る企画')}${tb(['段階','企画','ひとこと'],(k.plans||[]).map(p=>[stg(p.stage,1),esc(p.t),esc(p.note)]))}
+    ${h3('まだ無い切り口')}${tb(['切り口','本数','ねらい'],(k.blank||[]).map(b=>[esc(b.t),esc(b.n),esc(b.aim)]))}
+    ${h3('ライバルの型の借り方（ネタは写さず、型だけ借りる）')}${tb(['借りる型','変える切り口'],(k.borrow||[]).map(b=>[esc(b.kata),esc(b.kae)]))}
+    ${h3('見ている人')}${tb(['視聴者像','望んでいること'],(k.persona||[]).map(p=>[esc(p.who),esc(p.want)]))}
+    <div class="bs" style="margin-top:8px">${esc(k.caveat)}</div></div>`);
+  $('#kcard').scrollIntoView({behavior:'smooth',block:'start'});
+}
 
 let showArc=false;
 async function archive(id,on){
@@ -204,7 +254,7 @@ async function show(id){
     h+=`<div class="card" id="redo"><h2>指示してもう一度作る<small>案がイマイチなときに、直してほしいことを書いて作り直せます。指示していない所は前の案のまま残し、前の案は控えとして保存します。できあがると共有URLも新しくなります</small></h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px"><span style="font-size:12.5px;color:var(--sub)">直す範囲：</span>
       ${Object.entries(tn).map(([k,l],i)=>`<label style="font-size:13px"><input type="radio" name="rtg" value="${k}" ${i==0?'checked':''}> ${l}</label>`).join('')}</div>
-      <textarea id="rnote" data-job="${j.id}" rows="4" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:#fff" placeholder="例）④の義母のセリフをもっと嫌味にして。サムネ①の最終行は「直後、義母が顔面蒼白」に。タイトルは全部「白米」を残して"></textarea>
+      <textarea id="rnote" data-job="${j.id}" rows="4" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:#fff" placeholder="例）④の義母のセリフをもっと嫌味にして。サムネ①の最終行は「直後、義母が半狂乱」に。タイトルは全部「白米」を残して"></textarea>
       <div style="display:flex;justify-content:flex-end;margin-top:8px"><button onclick="redo(${j.id})">この指示で作り直す</button></div>
       ${rq.length?`<details style="margin-top:6px"><summary>これまでの指示（${rq.length}件）</summary>${rq.map(r=>`<div style="font-size:12.5px;border-top:1px solid var(--line);padding:6px 0"><span style="color:var(--sub)">${esc(r.at)}・${esc(tn[r.target]||'')}</span><br>${esc(r.note).replace(/\n/g,'<br>')}</div>`).join('')}</details>`:''}</div>`;
   }
@@ -218,13 +268,14 @@ async function show(id){
       <div class="kv"><div><b>${num(i.views)}</b><span>再生数</span></div><div><b>${esc(i.date||'—')}</b><span>投稿日</span></div><div><b>${dur}</b><span>長さ</span></div><div><b>${num(i.likes)}</b><span>高評価</span></div><div><b>${num(i.comments)}</b><span>コメント</span></div></div>
       ${s.ref?`<div style="margin-top:10px;font-size:12.5px"><span style="color:var(--sub)">競合データのサムネ文言（OCR）：</span>${esc(s.ref.lines.join(' / '))}</div>`:''}
     </div></div></div>`;
+    h+=fitHtml(j.fit,r);
   }
   if(j.result){
     const vt=v.titles||[];
     h+=`<div class="card"><h2>タイトルのリライト案<small>スキル madoka-title の手順（99字以下・避け語なし・敵役1個まで）。チップは根拠の言い回しを競合の「タイトル」で数えた強さ</small></h2>`;
     if((r.title_weak||[]).length)h+=`<div style="font-size:12.5px;margin-bottom:10px;color:var(--text)">元タイトルの弱点：${(r.title_weak||[]).map(esc).join('／')}</div>`;
     h+=`<div class="props">`+(r.titles||[]).map((t,k)=>`<div class="prop ${k==r.title_best?'best':''}"><div class="lab"><span>案${k+1}　${esc(t.type)}</span><span>${(vt[k]||{}).len||t.title.length}字${k==r.title_best?'　★推奨':''}</span></div>
-      <div class="tt">${esc(t.title)}</div><div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vt[k]||{}).phrases||[]).map(chip).join('')}</div>${(vt[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vt[k].a_up??(vt[k].phrases.filter(q=>q.top>=100).length)}／${vt[k].phrases.length}個</div>`:''}</div>`).join('')+`</div>`;
+      <div class="tt">${esc(t.title)}</div><div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vt[k]||{}).phrases||[]).map(chip).join('')}</div>${(vt[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vt[k].a_up??(vt[k].phrases.filter(q=>q.top>=100).length)}／${vt[k].phrases.length}個</div>`:''}${chLine((vt[k]||{}).ch)}</div>`).join('')+`</div>`;
     h+=(v.title_check||[]).map(c=>`<details><summary>検査（${esc(c.name)}）：${c.ok?'OK':'要確認'}</summary><pre>${esc(c.text)}</pre></details>`).join('');
     h+=`</div>`;
     const vs=v.thumbs||[];
@@ -235,7 +286,7 @@ async function show(id){
       ${(j.samune||{})[k]?`<a href="/job/${j.id}/samune/${esc(j.samune[k])}" target="_blank" rel="noopener" title="大きく見る"><img class="sbimg" src="/job/${j.id}/samune/${esc(j.samune[k])}" alt="サムネ文言案 ${esc(t.label)}"></a>
         <div class="stxt"><pre>${esc((t.lines||[]).join('\n'))}</pre><button class="ghost" onclick="copyTxt(this)">文字をコピー</button></div>`
         :`<div class="thumbbox">${(t.lines||[]).map(l=>`<div>${esc(l)}</div>`).join('')}</div>${j.state=='完了'?'<div class="note">ヨメコ3型の画像を作っています（1枚10秒ほど）…</div>':''}`}
-      <div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vs[k]||{}).phrases||[]).map(chip).join('')}</div>${(vs[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vs[k].a_up??(vs[k].phrases.filter(q=>q.top>=100).length)}／${vs[k].phrases.length}個</div>`:''}
+      <div class="why">${esc(t.reason)}</div>${(t.changes||[]).length?`<div class="chg">変えた所：${t.changes.map(esc).join('／')}</div>`:''}<div class="chips">${((vs[k]||{}).phrases||[]).map(chip).join('')}</div>${(vs[k]||{}).phrases?`<div class="note" style="margin-top:4px">A以上の言い回し：${vs[k].a_up??(vs[k].phrases.filter(q=>q.top>=100).length)}／${vs[k].phrases.length}個</div>`:''}${chLine((vs[k]||{}).ch)}
       ${(t.refs||[]).length?`<div style="font-size:11.5px;color:var(--sub)">根拠のサムネ：${t.refs.map(id=>{const n=(s.pick||[]).findIndex(p=>p.id==id);return n>=0?`#${n+1}`:`<a href="https://www.youtube.com/watch?v=${esc(id)}" target="_blank" rel="noopener">${esc(id)}</a>`}).join('　')}</div>`:''}
       ${((vs[k]||{}).not_in_sim||[]).length?`<div class="note" style="color:var(--none)">似ている80本にも元にも無い言い回し：${vs[k].not_in_sim.map(esc).join('、')}</div>`:''}
       ${t.needs_check?`<div class="note">台本と要照合：${esc(t.needs_check)}</div>`:''}</div>`).join('')+`</div>`;
