@@ -286,7 +286,7 @@ function kkHtml(k,t,j){
   return out.length?`<div class="kk"><div class="h">この案の根拠にしたサムネ（${out.length}枚）</div><div class="kkg">${out.join('')}</div></div>`:'';
 }
 const shLine=s=>!s?'':`<div class="chk">最終行：<span class="ck ${s.ok?'ok':'ng'}">${s.ok?'✓ 伸びている文言':'✕ 伸びた本に無い'}</span>${s.src?`<span class="ck no">${s.src==='参考'?'参考の最終行':esc(s.ch)+' '+Math.round(s.views/10000)+'万回'}「${esc(s.text)}」</span>`:''}</div>`;
-const zrLine=z=>!z?'':`<div class="chk">参考との近さ：<span class="ck ${z.ok?'ok':'ng'}">${z.ok?'✓ ずれている':'✕ 近すぎる'}</span><span class="ck no">重なり ${Math.round(z.rate*100)}%</span><span class="ck no">${z.run!=null?'同じ並び '+z.run+'字':'ほぼ同じ行 '+z.same+'行'}</span></div>`;
+const zrLine=z=>!z?'':z.yoseru?`<div class="chk">参考への寄せ：<span class="ck ${z.ok?'ok':'ng'}">${z.ok?'✓ 参考に寄せている':'✕ 参考から離れすぎ'}</span><span class="ck no">重なり ${Math.round(z.rate*100)}%</span></div>`:`<div class="chk">参考との近さ：<span class="ck ${z.ok?'ok':'ng'}">${z.ok?'✓ ずれている':'✕ 近すぎる'}</span><span class="ck no">重なり ${Math.round(z.rate*100)}%</span><span class="ck no">${z.run!=null?'同じ並び '+z.run+'字':'ほぼ同じ行 '+z.same+'行'}</span></div>`;
 
 let showArc=false;
 async function archive(id,on){
